@@ -3,9 +3,13 @@ import dotenv from "dotenv";
 import mongoose from "mongoose";
 import cors from "cors";
 import authRoutes from "./Routes/authRoutes.js";
+import homeRoutes from "./Routes/home.js";
+import aboutRoutes from "./Routes/about.js";
+import serviceRoutes from './Routes/service.js'
 
 
 dotenv.config();
+const PORT = process.env.PORT || 3000;
 
 const app = express();
 app.use(cors({
@@ -20,6 +24,9 @@ mongoose.connect(process.env.MONGO_URI, {
 });
 
 app.use('/api/auth', authRoutes);
+app.use("/api/home", homeRoutes);
+app.use("/api/about", aboutRoutes);
+app.use("/api/service", serviceRoutes);
 
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+app.listen(PORT, () => console.log("Server running on port 3000"));
