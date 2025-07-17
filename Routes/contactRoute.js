@@ -1,9 +1,7 @@
-
 import express from "express";
 import Contact from "../Models/contactUs.js";
 
 const router = express.Router();
-
 
 router.post("/", async (req, res) => {
   try {

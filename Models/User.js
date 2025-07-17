@@ -20,9 +20,14 @@ const userSchema = new mongoose.Schema(
     },
     password: {
       type: String,
-      required: true,
-      minlength: 10,
+      required: function () {
+        return !this.provider;
+      }
     },
+    provider: { type: String },
+    firebaseUid: { type: String },
+    profilePic: { type: String }
+
   },
   { timestamps: true }
 );

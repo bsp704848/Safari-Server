@@ -4,7 +4,7 @@ import User from '../Models/User.js';
 import { hash } from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-
+import { getAuth } from '../firebaseAdmin.js';
 
 router.post('/register', async (req, res) => {
   try {
@@ -38,7 +38,6 @@ router.post('/register', async (req, res) => {
   }
 }); 
 
-
 router.post('/login', async (req, res) => {
     try {
       const { email, password } = req.body;
@@ -57,7 +56,6 @@ router.post('/login', async (req, res) => {
         'your_jwt_secret',
         { expiresIn: '1d' }
       );
-  
       res.json({
         message: 'Login successful',
         user: {
@@ -70,6 +68,54 @@ router.post('/login', async (req, res) => {
     } catch (error) {
       res.status(500).json({ message: error.message });
     }
-  });
+}); 
+  
+router.post("/social-login", async (req, res) => {
+  try {
+    const { idToken, provider } = req.body;
+
+    const decoded = await getAuth().verifyIdToken(idToken);
+    console.log("Decoded Token:", decoded);
+
+    const email = decoded.email;
+    const name = decoded.name;
+    const photo = decoded.picture;
+    const firebaseUid = decoded.uid;
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      user = new User({
+        email,
+        username: name,
+        profilePic: photo,
+        provider,
+        firebaseUid,
+      });
+      await user.save();
+    }
+
+         const token = jwt.sign(
+        { id: user._id, email: user.email },
+        'your_jwt_secret',
+        { expiresIn: '1d' }
+      );
+
+    res.json({
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email,
+        profilePic: user.profilePic,
+      },
+      token
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Social login failed" });
+  }
+});
+
 
 export default router;
